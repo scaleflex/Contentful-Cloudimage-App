@@ -9,7 +9,6 @@
     "@contentful/f36-tokens": "4.0.1",
     "@contentful/forma-36-react-components": "^3.100.7",
     "@contentful/react-apps-toolkit": "1.2.8",
-    "contentful-management": "10.19.0",
     "emotion": "10.0.27",
     "react": "17.0.2",
     "react-cloudimage-responsive": "^3.6.4",

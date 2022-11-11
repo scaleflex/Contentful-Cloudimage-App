@@ -1,70 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Paragraph } from '@contentful/f36-components';
-import { useSDK, useAutoResizer } from '@contentful/react-apps-toolkit';
+import { useSDK, useCMA, useAutoResizer } from '@contentful/react-apps-toolkit';
 import Img, { CloudimageProvider } from 'react-cloudimage-responsive';
 import './Field.css';
 
 const Field = () => {
   const sdk = useSDK();
+  const cma = useCMA();
+
   const isPublished = !!sdk.entry.getSys().publishedVersion;
   const [isProcessing, setIsProcessing] = useState(false);
   const configs = sdk.parameters.installation;
   useAutoResizer();
 
-
-  // // CHECK VERSION
-  // let headers = new Headers();
-  // headers.append("x-hexa-missingbehavior", "default_200");
-  // let options = {
-  //   method: 'GET',
-  //   headers: headers
-  // };
-  // let response = await fetch(`https://${configs.token}.cloudimg.io/v7/http://sample.li/blank.png`, options);
-  // // v7 if response.status === 200 && !response.headers.get('x-hexa-missingbehavior')
-
-
   const ciConfig = {
     token: configs.token,
-    lazyLoading: true,
+    lazyLoading: JSON.parse( configs.lazy_loading ),
     apiVersion: null
   };
 
-  const updateImages = function(event) 
+  const updateImages = async function(event) 
   {
+    setIsProcessing(true);
+
     let images = event.target.files;
+
+    let existings = sdk.entry.fields.cloudimage.getValue(); 
+    existings = existings ? existings : {}; 
 
     if (images && images.length) 
     {
       for (let i = 0; i < images.length; i++)
       {
-        // Encode the file using the FileReader API
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          setIsProcessing(true);
+        const data = await new Promise((resolve, reject) => {
+          var reader = new FileReader();
+          reader.onload = () => {
+            resolve(reader.result);
+          };
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(images[i]);
+        });
+        let asset = await cma.asset.createFromFiles(
+          {},
+          {
+            fields: {
+              title: { [sdk.locales.default]: images[i].name },
+              description: { [sdk.locales.default]: '' },
+              file: {
+                [sdk.locales.default]: {
+                  file: data,
+                  fileName: images[i].name,
+                  contentType: images[i].type,
+                },
+              },
+            },
+          }
+        );
+        asset = await cma.asset.processForAllLocales({}, asset);
+        asset = await cma.asset.publish({ assetId: asset.sys.id }, asset);
 
-          // Use a regex to remove data url part
-          let base64String = reader.result
-            .replace('data:', '')
-            .replace(/^.+,/, '');
-
-          let upload = await sdk.space.createUpload(base64String);
-          let asset = await sdk.space.createAsset(upload)
-          asset = await sdk.space.getAsset(/*asset.sys.id*/ '5y4YUss6XwdBwyfkMX4qeO'); // Temp for dev
-          let url = asset.fields.file[sdk.locales.default].url;
-
-          let existings = sdk.entry.fields.cloudimage.getValue(); 
-          existings = existings ? existings : {}; 
-          let uniqueId = `${Math.floor(Math.random() * 1000000000000000)}${Date.now()}`;
-          existings[uniqueId] = url;
-          console.dir(url);
-          sdk.entry.fields.cloudimage.setValue(existings);
-
-          setIsProcessing(false);
-          window.location.reload();
-        };
-        reader.readAsDataURL(images[i]);
+        let url = asset.fields.file[sdk.locales.default].url;
+        let uniqueId = `${Math.floor(Math.random() * 1000000000000000)}${Date.now()}`;
+        existings[uniqueId] = url;
+        sdk.entry.fields.cloudimage.setValue(existings);
       }
     }
+
+    setIsProcessing(false);
+    window.location.reload();
   }
 
   const removeTile = function(e) 
@@ -87,11 +90,6 @@ const Field = () => {
   {
     let existings = sdk.entry.fields.cloudimage.getValue();
     existings = existings ? existings : {};
-    // existings = { // Temp for dev
-    //   'aaa':'https://images.ctfassets.net/80fs6s6xy4li/5y4YUss6XwdBwyfkMX4qeO/78f9bf5c7d9cd54fd345d34d806b650a/bay.jpg',
-    //   'bbb':'https://cdn.scaleflex.it/demo/cloudimage-responsive-demo/Girl+img.jpg'
-    // };
-    console.dir(existings);
     let gallery = [];
 
     for (const [key, value] of Object.entries(existings)) 
