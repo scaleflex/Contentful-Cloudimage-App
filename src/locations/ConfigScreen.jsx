@@ -22,6 +22,14 @@ const ConfigScreen = () => {
         "description": "Use Cloudimage lazy-loading or not. https://github.com/scaleflex/js-cloudimage-responsive#lazyloading",
         "required": true,
         "value": 'true,false'
+      },
+      {
+        "id": "version",
+        "type": "List",
+        "name": "Is version 7?",
+        "description": "Is the token version 7 or not.",
+        "required": true,
+        "value": 'true,false'
       }
     ],
     validateParameters: () => null,

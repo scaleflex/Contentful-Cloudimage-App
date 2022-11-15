@@ -16,7 +16,7 @@ const Field = () => {
   const ciConfig = {
     token: configs.token,
     lazyLoading: JSON.parse( configs.lazy_loading ),
-    apiVersion: null
+    apiVersion: JSON.parse( configs.version ) ? 'v7' : null
   };
 
   const updateImages = async function(event) 
@@ -32,7 +32,7 @@ const Field = () => {
     {
       for (let i = 0; i < images.length; i++)
       {
-        const data = await new Promise((resolve, reject) => {
+        let data = await new Promise((resolve, reject) => {
           var reader = new FileReader();
           reader.onload = () => {
             resolve(reader.result);
@@ -40,6 +40,7 @@ const Field = () => {
           reader.onerror = reject;
           reader.readAsArrayBuffer(images[i]);
         });
+
         let asset = await cma.asset.createFromFiles(
           {},
           {
@@ -56,6 +57,7 @@ const Field = () => {
             },
           }
         );
+
         asset = await cma.asset.processForAllLocales({}, asset);
         asset = await cma.asset.publish({ assetId: asset.sys.id }, asset);
 
