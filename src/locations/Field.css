@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid black;
+  width: 99%;
+  min-height: 500px;
+}
+input {
+  padding-top: 10px;
+}
+
+.tile {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+.close:before {
+  content: '✕';
+}
+.close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  font-size: 20px;
+  color: red;
+  font-weight: bold;
+}
