@@ -27,9 +27,10 @@ const ConfigScreen = () => {
         "id": "version",
         "type": "List",
         "name": "Is version 7?",
-        "description": "Is the token version 7 or not.",
+        "description": "FALSE for tokens created after 01.10.2021. TRUE for tokens created before.",
         "required": true,
-        "value": 'true,false'
+        "value": 'true,false',
+        "default": 'false'
       }
     ],
     validateParameters: () => null,
