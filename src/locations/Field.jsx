@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Paragraph } from '@contentful/f36-components';
+import { Paragraph, TextInput } from '@contentful/f36-components';
 import { useSDK, useCMA, useAutoResizer } from '@contentful/react-apps-toolkit';
 import Img, { CloudimageProvider } from 'react-cloudimage-responsive';
 import './Field.css';
@@ -16,7 +16,7 @@ const Field = () => {
   const ciConfig = {
     token: configs.token,
     lazyLoading: JSON.parse( configs.lazy_loading ),
-    apiVersion: JSON.parse( configs.version ) ? 'v7' : null
+    apiVersion: JSON.parse( configs.version ) ? null : 'v7'
   };
 
   const updateImages = async function(event) 
@@ -114,7 +114,7 @@ const Field = () => {
 
   return (
     <div className="container">
-      {!isPublished && <input type="file" multiple accept="image/*" onChange={updateImages} />}
+      {!isPublished && <TextInput type="file" multiple accept="image/*" size="small" onChange={updateImages} />}
       {isProcessing && <Paragraph>Processing ...</Paragraph>}
       <CloudimageProvider config={ciConfig}>
         {displayExistingImages()}
