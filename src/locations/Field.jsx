@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Paragraph, TextInput } from '@contentful/f36-components';
 import { useSDK, useCMA, useAutoResizer } from '@contentful/react-apps-toolkit';
 import Img, { CloudimageProvider } from 'react-cloudimage-responsive';
@@ -8,11 +8,18 @@ const Field = () => {
   const sdk = useSDK();
   const cma = useCMA();
 
-  const isPublished = !!sdk.entry.getSys().publishedVersion;
+  const [isPublished, setIsPublished] = useState( !!sdk.entry.getSys().publishedVersion );
   const [isProcessing, setIsProcessing] = useState(false);
   const configs = sdk.parameters.installation;
   useAutoResizer();
 
+  useEffect(() => {
+    function sysChangeHandler(value) 
+    {
+      setIsPublished( !!sdk.entry.getSys().publishedVersion );
+    }
+    sdk.entry.onSysChanged(sysChangeHandler);
+  }, [sdk]);
   const ciConfig = {
     token: configs.token,
     lazyLoading: JSON.parse( configs.lazy_loading ),
